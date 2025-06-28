@@ -35,4 +35,7 @@ return [
         ],
     ],
 
+    'notification_microservice' => [
+        'url' => env('NOTIFICATION_MICROSERVICE_URL', env('app_url').'/api/notify'),
+    ],
 ];
