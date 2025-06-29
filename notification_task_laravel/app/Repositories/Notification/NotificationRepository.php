@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Notification;
 
+use App\Enums\NotificationStatusEnum;
 use App\Models\Notification;
 use Illuminate\Support\Collection;
 use App\Repositories\BaseRepository;
@@ -33,7 +34,9 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     {
         return [
             'total' => $this->model->count(),
-            'processed' => $this->model->where('status', 'processed')->count(),
+            'pending' => $this->model->where('status', NotificationStatusEnum::PENDING)->count(),
+            'sent' => $this->model->where('status', NotificationStatusEnum::SENT)->count(),
+            'failed' => $this->model->where('status', NotificationStatusEnum::FAILED)->count(),
         ];
     }
 }

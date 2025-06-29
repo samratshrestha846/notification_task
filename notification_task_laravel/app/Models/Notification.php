@@ -8,7 +8,7 @@ use App\Models\ColumnConstants\NotificationColumnConstant;
 use Illuminate\Database\Eloquent\Model;
 use App\Enums\NotificationStatusEnum;
 
-class Notification extends Model implements NotificationColumnConstant, NotificationStatusEnum
+class Notification extends Model implements NotificationColumnConstant
 {
     protected $table = 'notifications';
 
@@ -20,7 +20,6 @@ class Notification extends Model implements NotificationColumnConstant, Notifica
 
     protected $casts = [
         self::USER_ID => 'integer',
-        self::STATUS => NotificationStatusEnum::class,
      ];
 
     public function user()
@@ -30,16 +29,16 @@ class Notification extends Model implements NotificationColumnConstant, Notifica
 
     public function scopeSent($query)
     {
-        return $query->where(self::STATUS, self::SENT);
+        return $query->where(self::STATUS, NotificationStatusEnum::SENT);
     }
 
     public function scopePending($query)
     {
-        return $query->where(self::STATUS, self::PENDING);
+        return $query->where(self::STATUS, NotificationStatusEnum::PENDING);
     }
 
     public function scopeFailed($query)
     {
-        return $query->where(self::STATUS, self::FAILED);
+        return $query->where(self::STATUS, NotificationStatusEnum::FAILED);
     }
 }

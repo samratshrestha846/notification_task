@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\DTO\NotificationDTO;
+use App\Events\NotificationCreated;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use App\Repositories\Notification\NotificationRepositoryInterface;
+use Illuminate\Validation\ValidationException;
 
 class NotificationService extends BaseService
 {
@@ -19,19 +21,23 @@ class NotificationService extends BaseService
         $rateKey = "user:{$dto->userId}:notifications";
 
         $count = Cache::increment($rateKey);
-        Cache::put($rateKey, $count, now()->addHour());
+
+        if ($count === false) {
+            $count = (int) Cache::get($rateKey, 0) + 1;
+            Cache::put($rateKey, $count, now()->addHour());
+        }
 
         if ($count > 10) {
-            throw new \Exception('Rate limit exceeded');
+            throw ValidationException::withMessages([
+                'notifications' => ['You have exceeded the limit of 10 notifications per hour. Please try again later.']
+            ]);
         }
 
         $notification = $this->repo->create($dto->toArray());
-        Http::post(config('services.notification_microservice.url'), [
-            'notification_id' => $notification->id,
-            'user_id' => $dto->userId,
-            'message' => $dto->message,
-        ]);
+
+        NotificationCreated::dispatch($notification);
 
         return $notification;
     }
+
 }
